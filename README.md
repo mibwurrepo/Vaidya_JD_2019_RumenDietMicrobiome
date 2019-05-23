@@ -1,7 +1,7 @@
 Study title: Characterization of dairy cow rumen bacterial and archaeal communities associated with grass silage and maize silage based diets    
 ---------------------------------------------------------------------------------  
 
-Authors: Jueeli D. Vaidya1, Sanne van Gastelen, Hauke Smidt, Caroline M. Plugge, Joan E. Edwards    
+Authors: Jueeli D. Vaidya, Sanne van Gastelen, Hauke Smidt, Caroline M. Plugge, Joan E. Edwards    
 
 Correspondence: JDV (jueeli.vaidya[at]wur.nl)   
 
@@ -16,7 +16,7 @@ Structure:
 Vaidya_JD_2019_RumenDietMicrobiome/ # Main repository  
                      |---- archaea_analysis.RMD # Codes for analysis of Archaeal data.   
                      |---- bacterial_analysis.RMD # Codes for analysis of Bacterial data.   
-                     |---- input/ # biom files and phyloseq objects for bacterial and archeal community analysis.  
+                     |---- input/ # Filtered cleaned Phyloseq objects for bacterial and archaeal community analysis.  
                               |--- pseq_archaea.rds  
                               |--- pseq_bacteria.rds  
 
