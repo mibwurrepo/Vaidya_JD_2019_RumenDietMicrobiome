@@ -1,0 +1,254 @@
+---
+title: "Characterization of dairy cow rumen bacterial and archaeal communities associated with grass silage and maize silage based diets (Bacterial)"
+output: word_document
+---
+
+
+## set up project folders  
+
+```{r}
+
+dir.create("bacteria")
+dir.create("bacteria/figures")
+dir.create("bacteria/tables")
+
+
+```
+
+## load libraries  
+
+```{r, warning=FALSE, message=FALSE}
+
+library(ggplot2)
+library(ape)
+library(plyr)
+library(vegan)
+library(RColorBrewer)
+library(reshape2)
+library(data.table)
+library(microbiome)
+library(dplyr)
+library(phyloseq)
+library(knitr) #for interactive tables
+library(picante)
+
+```
+
+
+## Read files to phyloseq  
+```{r}
+pseq.1 <- readRDS("./input/pseq_bacteria.rds")
+```
+
+
+# Phylogenetic diversity   
+
+
+```{r}
+
+dir.create("./bacteria/PD")
+
+my_colors <- c("#CBD588", "#5F7FC7", "orange","#DA5724", "#508578", "#CD9BCD", "#AD6F3B", "#673770","#D14285", "#652926", "#C84248", "#8569D5", "#5E738F","#D1A33D", "#8A7C64", "#599861", "steelblue" )
+
+set.seed(8729)
+otu_table_ps1 <- as.data.frame(pseq.1@otu_table)
+metadata_table_ps1  <- as.data.frame(pseq.1@sam_data)
+treefile_p1 <- pseq.1@phy_tree
+
+df.pd <- pd(t(otu_table_ps1), treefile_p1,include.root=F) 
+
+
+knitr::kable(df.pd)
+
+write.csv(df.pd, "./bacteria/PD/phylogenetic_diversity_10_17.csv")
+```
+
+
+## Plot PD  
+
+```{r}
+
+## Figure 2B and Figure 2A
+
+colnames(metadata_table_ps1)
+metadata_table_ps1$PhylogeneticDiversity <- df.pd$PD
+
+library(ggpubr)
+
+lev <- levels(metadata_table_ps1$Timepoint) # get the variables
+
+# make a pairwise list that we want to compare.
+L.pairs <- combn(seq_along(lev), 2, simplify = FALSE, FUN = function(i)lev[i])
+#str(metadata_table_ps1) 
+metadata_table_ps1$Diet
+
+plot.pd <- ggplot(metadata_table_ps1, aes(Timepoint, PhylogeneticDiversity)) + geom_boxplot(aes(fill = Timepoint)) + geom_point(size = 3) + theme(axis.text.x = element_text(size=14, angle = 90)) + scale_fill_manual(values = c("forestgreen", "steelblue")) + theme_bw()
+print(plot.pd)
+
+
+#write.csv(metadata_table_ps1, "./bacteria/PD/metadata_table_ps1.csv")
+
+ggsave("./bacteria/PD/phylogenetic_diversity_bacteria_timepoint.pdf", height = 6, width = 7)
+
+
+plot.pd.diet <- ggplot(metadata_table_ps1, aes(Diet, PhylogeneticDiversity))  + geom_boxplot(aes(fill = Diet)) + geom_point(size = 3) + theme(axis.text.x = element_text(size=14, angle = 90)) + scale_fill_manual(values = c("tomato", "olivedrab4", "lightseagreen","mediumpurple", "#508578")) + theme_bw()
+print(plot.pd.diet)
+ggsave("./bacteria/PD/PD_diet.pdf", height = 6, width = 7)
+
+
+
+```
+
+## Test PD  
+
+Comparison of Phylogenetic diversity with key variables.  
+```{r}
+
+
+kruskal.test(metadata_table_ps1$PhylogeneticDiversity, metadata_table_ps1$Diet, p.adj = "fdr")
+
+pairwise.wilcox.test(metadata_table_ps1$PhylogeneticDiversity, metadata_table_ps1$Timepoint, p.adj = "fdr")
+
+pairwise.wilcox.test(metadata_table_ps1$PhylogeneticDiversity, metadata_table_ps1$Block, p.adj = "fdr")
+
+ggpubr::ggqqplot(metadata_table_ps1, "PhylogeneticDiversity")
+
+```
+
+
+Comparison of Phylogenetic diversity with key variables.  
+
+```{r}
+
+shapiro.test(metadata_table_ps1$PhylogeneticDiversity)
+
+pairwise.t.test(metadata_table_ps1$PhylogeneticDiversity, metadata_table_ps1$Timepoint)
+
+kruskal.test(metadata_table_ps1$PhylogeneticDiversity, metadata_table_ps1$Diet, p.adj = "fdr")
+kruskal.test(metadata_table_ps1$PhylogeneticDiversity, metadata_table_ps1$Diet_Timepoint, p.adj = "fdr")
+#pairwise.wilcox.test(metadata_table_ps1$PhylogeneticDiversity, metadata_table_ps1$Diet,
+#                 p.adjust.method = "fdr")
+
+
+kruskal.test(metadata_table_ps1$PhylogeneticDiversity, metadata_table_ps1$Block, p.adj = "fdr")
+
+# pairwise.wilcox.test(metadata_table_ps1$PhylogeneticDiversity, metadata_table_ps1$Block, p.adj = "fdr")
+
+
+```
+
+
+## PCoA  
+
+#weighted analysis for bacteria  
+
+Supplementary Figure 1  
+```{r}
+#For plotting weighted
+ps1.rel <- microbiome::transform(pseq.1, "compositional")
+set.seed(49275)  #set seed for reproducible rooting of the tree
+
+
+ordu.wt.uni = ordinate(ps1.rel, "PCoA", "unifrac", weighted = TRUE)
+
+
+
+wt.unifrac <- plot_ordination(ps1.rel, ordu.wt.uni, 
+                              color = "Diet", 
+                              shape = "Timepoint")
+
+wt.unifrac <- wt.unifrac + scale_fill_manual(values = c("tomato", "olivedrab4", "lightseagreen","mediumpurple", "#508578")) + 
+  ggtitle("Weighted UniFrac relative abundance") + 
+  geom_point(size = 5) + theme_bw()
+
+print(wt.unifrac)
+
+
+ggsave("./bacteria/figures/PCoA_weighted_bacteria_coloured by timepoint.pdf", height = 6, width = 7)
+```
+
+
+Figure 2C  
+
+```{r}
+#unweighted analysis for bacteria
+
+set.seed(475)  #set seed for reproducible rooting of the tree
+ordu.unwt.uni = ordinate(ps1.rel, "PCoA", "unifrac", weighted = F)
+
+unwt.unifrac <- plot_ordination(ps1.rel, ordu.unwt.uni, 
+                                color = "Diet", 
+                                shape = "Timepoint") + 
+  ggtitle("Unweighted UniFrac relative abundance") + 
+  geom_point(size = 5) + theme_bw()
+
+print(unwt.unifrac)
+ggsave("./bacteria/figures/PCoA_unweighted_bacteria_coloured by timepoint.pdf", height = 6, width = 7)
+
+```
+
+
+## beta diversity test  
+
+```{r}
+
+metadf <- data.frame(sample_data(ps1.rel))
+
+set.seed(28567)
+unifrac.dist <- UniFrac(ps1.rel, 
+                        weighted = TRUE, 
+                        normalized = TRUE,  
+                        parallel = FALSE, 
+                        fast = TRUE)
+
+```
+
+
+
+```{r}
+set.seed(92661694)
+adonis(unifrac.dist ~ Diet*Timepoint, data = metadf)
+
+```
+
+
+# beta diversity test unwt  
+
+```{r}
+
+set.seed(285667)
+unwt.unifrac.dist <- UniFrac(ps1.rel, 
+                        weighted = FALSE, 
+                        normalized = TRUE,  
+                        parallel = FALSE, 
+                        fast = TRUE)
+
+```
+
+
+
+```{r}
+set.seed(961694)
+adonis(unwt.unifrac.dist ~ Diet*Timepoint, data = metadf)
+
+```
+
+
+
+
+
+```{r}
+
+sessionInfo()
+
+```
+
+
+
+
+
+
+
+
+
+
