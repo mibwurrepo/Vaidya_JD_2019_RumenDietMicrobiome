@@ -13,7 +13,7 @@ project folder:
 
 ```
 Structure:  
-EdwardsJ_2019_EquineCoreMicrobiome/ # Main repository  
+Vaidya_JD_2019_RumenDietMicrobiome/ # Main repository  
                      |---- archaea_analysis.RMD # Codes for analysis of Archaeal data.   
                      |---- bacterial_analysis.RMD # Codes for analysis of Bacterial data.   
                      |---- input/ # biom files and phyloseq objects for bacterial and archeal community analysis.  
