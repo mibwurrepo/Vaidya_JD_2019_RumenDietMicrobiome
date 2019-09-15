@@ -22,3 +22,9 @@ Vaidya_JD_2019_RumenDietMicrobiome/ # Main repository
 
 ```
 
+Instructions  
+
+1. Download the repo and unzip.  
+2. Open Rumen diet data analysis.Rproj in RStudio.  
+3. Open archaea_analysis.RMD and click in knit.  
+4. Open bacterial_analysis.RMD and click in knit.  
