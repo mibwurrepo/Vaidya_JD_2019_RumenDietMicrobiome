@@ -3,7 +3,7 @@ Study title: Characterization of dairy cow rumen bacterial and archaeal communit
 
 Authors: Jueeli D. Vaidya, Sanne van Gastelen, Hauke Smidt, Caroline M. Plugge, Joan E. Edwards    
 
-Correspondence: JDV (jueeli.vaidya[at]wur.nl)   
+Correspondence: Hauke Smidt (hauke.smidt[at]wur.nl)   
 
 This repository contains codes for analysis done in the research article by Vaidya JD, et al (2019) Characterization of dairy cow rumen bacterial and archaeal communities associated with grass silage and maize silage based diets.  _Under review_. [XX](tobeupdated_when_uplished).  
 
